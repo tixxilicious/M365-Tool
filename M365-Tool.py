@@ -146,11 +146,15 @@ Write-Output "{end_m}"
 class StyledButton(tk.Canvas):
     def __init__(self, parent, text, command=None, bg=COLORS['accent'],
                  fg='#ffffff', width=160, height=34, font_size=10, **kw):
-        # Remove width/height from kw if accidentally passed
         kw.pop('width', None)
         kw.pop('height', None)
-        super().__init__(parent, width=width, height=height,
-                         bg=parent.cget('bg'), highlightthickness=0, **kw)
+        parent_bg = COLORS['bg_panel']
+        try:
+            parent_bg = parent.cget('bg')
+        except:
+            pass
+        super().__init__(parent, highlightthickness=0, borderwidth=0, **kw)
+        super().configure(width=width, height=height, bg=parent_bg)
         self.command = command
         self.bg_color = bg
         self.fg_color = fg
@@ -161,7 +165,7 @@ class StyledButton(tk.Canvas):
         self._bh = height
         self.font_size = font_size
         self.enabled = True
-        self._draw(self.bg_color)
+        self.after(10, lambda: self._draw(self.bg_color))
         self.bind('<Enter>', lambda e: self._draw(self.hover_color) if self.enabled else None)
         self.bind('<Leave>', lambda e: self._draw(self.bg_color if self.enabled else self.disabled_color))
         self.bind('<Button-1>', lambda e: self.command() if self.enabled and self.command else None)
@@ -174,12 +178,8 @@ class StyledButton(tk.Canvas):
 
     def _draw(self, color):
         self.delete('all')
-        r, w, h = 6, self._bw, self._bh
-        for cx, cy, s, e in [(0,0,r*2,r*2,90,90),(w-r*2,0,w,r*2,0,90),
-                               (0,h-r*2,r*2,h,180,90),(w-r*2,h-r*2,w,h,270,90)]:
-            self.create_arc(cx, cy, s, e, start=e if isinstance(e, int) else s,
-                            extent=90, fill=color, outline=color)
-        # Simplified: just draw rects
+        r = 6
+        w, h = self._bw, self._bh
         self.create_arc(0, 0, r*2, r*2, start=90, extent=90, fill=color, outline=color)
         self.create_arc(w-r*2, 0, w, r*2, start=0, extent=90, fill=color, outline=color)
         self.create_arc(0, h-r*2, r*2, h, start=180, extent=90, fill=color, outline=color)

@@ -146,6 +146,9 @@ Write-Output "{end_m}"
 class StyledButton(tk.Canvas):
     def __init__(self, parent, text, command=None, bg=COLORS['accent'],
                  fg='#ffffff', width=160, height=34, font_size=10, **kw):
+        # Remove width/height from kw if accidentally passed
+        kw.pop('width', None)
+        kw.pop('height', None)
         super().__init__(parent, width=width, height=height,
                          bg=parent.cget('bg'), highlightthickness=0, **kw)
         self.command = command
@@ -154,8 +157,8 @@ class StyledButton(tk.Canvas):
         self.hover_color = self._adj(bg, 25)
         self.disabled_color = COLORS['text_muted']
         self.text = text
-        self._w = width
-        self._h = height
+        self._bw = width
+        self._bh = height
         self.font_size = font_size
         self.enabled = True
         self._draw(self.bg_color)
@@ -171,7 +174,7 @@ class StyledButton(tk.Canvas):
 
     def _draw(self, color):
         self.delete('all')
-        r, w, h = 6, self._w, self._h
+        r, w, h = 6, self._bw, self._bh
         for cx, cy, s, e in [(0,0,r*2,r*2,90,90),(w-r*2,0,w,r*2,0,90),
                                (0,h-r*2,r*2,h,180,90),(w-r*2,h-r*2,w,h,270,90)]:
             self.create_arc(cx, cy, s, e, start=e if isinstance(e, int) else s,
